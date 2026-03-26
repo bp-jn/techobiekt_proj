@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("db_modelling_gui_2026")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0f12e3ff97582f3d3d1ab63bd30700588333615c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2130cc84e4a3ba594c6cf8cab5772e9cb1160b8d")]
 [assembly: System.Reflection.AssemblyProductAttribute("db_modelling_gui_2026")]
 [assembly: System.Reflection.AssemblyTitleAttribute("db_modelling_gui_2026")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
