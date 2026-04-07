@@ -33,13 +33,21 @@ namespace DbModeler.ViewModels
         [RelayCommand]
         private void RemoveTable(Table table)
         {
-         
+            if (table != null)
+            {
+                Project.Tables.Remove(table);
+            }
+
         }
 
         [RelayCommand]
         private void AddColumn()
         {
-            
+            if (SelectedTable != null)
+            {
+                var newColumn = new Column { Name = $"Kolumna_{SelectedTable.Columns.Count + 1}" };
+                SelectedTable.Columns.Add(newColumn);
+            }
         }
 
     }
