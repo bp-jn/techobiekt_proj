@@ -2,13 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DbModeler.ViewModels"
-        Title="DbModeler" Height="500" Width="800">
+        Title="DbModeler" Height="600" Width="900">
 
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
 
-    <TabControl Margin="5">
+    <TabControl>
 
         <TabItem Header="Tryb formularzy">
             <Grid>
@@ -66,6 +66,15 @@
                         <DataGrid Grid.Row="2" ItemsSource="{Binding SelectedTable.Columns}" AutoGenerateColumns="False" CanUserAddRows="False">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Nazwa Kolumny" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTemplateColumn Header="Typ Danych" Width="100">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedItem="{Binding DataType, UpdateSourceTrigger=PropertyChanged}" 
+                                                      ItemsSource="{Binding DataContext.AvailableDataTypes, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                      Margin="2"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridCheckBoxColumn Header="Klucz Główny (PK)" Binding="{Binding IsPrimaryKey, UpdateSourceTrigger=PropertyChanged}"/>
                                 <DataGridCheckBoxColumn Header="Not Null" Binding="{Binding IsNotNull, UpdateSourceTrigger=PropertyChanged}"/>
                             </DataGrid.Columns>
@@ -75,15 +84,54 @@
             </Grid>
         </TabItem>
 
-        <TabItem Header="Tryb diagramu">
-            <Grid Background="#FFF5F5F5">
-                <TextBlock Text="Miejsce na interaktywny diagram bazy danych" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center" 
-                           Foreground="Gray" 
-                           FontSize="16" 
-                           FontStyle="Italic"/>
-            </Grid>
+        <TabItem Header="Tryb Diagramu">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="White">
+
+                <ItemsControl ItemsSource="{Binding Project.Tables}">
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas Width="3000" Height="3000" Background="Transparent" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding CanvasX, Mode=TwoWay}" />
+                            <Setter Property="Canvas.Top" Value="{Binding CanvasY, Mode=TwoWay}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="BlueViolet" BorderThickness="2" Background="White" CornerRadius="5" Width="150" Cursor="SizeAll"
+                                    MouseLeftButtonDown="TableBlock_MouseDown" 
+                                    MouseMove="TableBlock_MouseMove" 
+                                    MouseLeftButtonUp="TableBlock_MouseUp">
+
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Border Background="BlueViolet" CornerRadius="3,3,0,0" Padding="5">
+                                        <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+
+                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Columns}" Margin="5">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,2" Foreground="#333333"/>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </TabItem>
 
     </TabControl>
