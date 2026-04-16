@@ -22,11 +22,13 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <Button Content="Dodaj Tabelę" Command="{Binding AddTableCommand}" Margin="0,0,0,10" Padding="5"/>
 
-                        <ListBox Grid.Row="1" ItemsSource="{Binding Project.Tables}" SelectedItem="{Binding SelectedTable}">
+                        <ListBox Grid.Row="1" ItemsSource="{Binding Project.Tables}" SelectedItem="{Binding SelectedTable}" Margin="0,0,0,15">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,2">
@@ -34,9 +36,7 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-
                                         <Button Grid.Column="1" Content="Usuń" 
                                                 Command="{Binding DataContext.RemoveTableCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                 CommandParameter="{Binding}" 
@@ -45,6 +45,22 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+
+                        <Border Grid.Row="2" Background="#F9F9F9" Padding="10" CornerRadius="5">
+                            <StackPanel>
+                                <TextBlock Text="UTWÓRZ RELACJĘ" FontWeight="Bold" Margin="0,0,0,5" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Tabela źródłowa:" FontSize="10"/>
+                                <ComboBox ItemsSource="{Binding Project.Tables}" SelectedItem="{Binding SelectedSourceTable}" DisplayMemberPath="Name" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="Typ relacji:" FontSize="10"/>
+                                <ComboBox ItemsSource="{Binding AvailableRelationTypes}" SelectedItem="{Binding SelectedRelType}" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="Tabela docelowa:" FontSize="10"/>
+                                <ComboBox ItemsSource="{Binding Project.Tables}" SelectedItem="{Binding SelectedTargetTable}" DisplayMemberPath="Name" Margin="0,0,0,10"/>
+
+                                <Button Content="Połącz Tabele" Command="{Binding AddRelationshipCommand}" Padding="5"/>
+                            </StackPanel>
+                        </Border>
                     </Grid>
                 </Border>
 
@@ -85,52 +101,71 @@
         </TabItem>
 
         <TabItem Header="Tryb Diagramu">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="White">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Background="#F0F0F0">
+                <Grid Width="3000" Height="3000">
 
-                <ItemsControl ItemsSource="{Binding Project.Tables}">
+                    <ItemsControl ItemsSource="{Binding Project.Relationships}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Line X1="{Binding StartX}" Y1="{Binding StartY}" 
+                                      X2="{Binding EndX}" Y2="{Binding EndY}" 
+                                      Stroke="#555555" StrokeThickness="3" StrokeDashArray="4,4"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <Canvas Width="3000" Height="3000" Background="Transparent" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                    <ItemsControl ItemsSource="{Binding Project.Tables}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
 
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Left" Value="{Binding CanvasX, Mode=TwoWay}" />
-                            <Setter Property="Canvas.Top" Value="{Binding CanvasY, Mode=TwoWay}" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding CanvasX, Mode=TwoWay}" />
+                                <Setter Property="Canvas.Top" Value="{Binding CanvasY, Mode=TwoWay}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
 
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border BorderBrush="BlueViolet" BorderThickness="2" Background="White" CornerRadius="5" Width="150" Cursor="SizeAll"
-                                    MouseLeftButtonDown="TableBlock_MouseDown" 
-                                    MouseMove="TableBlock_MouseMove" 
-                                    MouseLeftButtonUp="TableBlock_MouseUp">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="BlueViolet" BorderThickness="2" Background="White" CornerRadius="5" Width="150" Cursor="SizeAll"
+                                        MouseLeftButtonDown="TableBlock_MouseDown" 
+                                        MouseMove="TableBlock_MouseMove" 
+                                        MouseLeftButtonUp="TableBlock_MouseUp">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
 
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
+                                        <Border Background="BlueViolet" CornerRadius="3,3,0,0" Padding="5">
+                                            <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        </Border>
 
-                                    <Border Background="BlueViolet" CornerRadius="3,3,0,0" Padding="5">
-                                        <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                    </Border>
+                                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Columns}" Margin="5">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,2">
+                                                        <TextBlock Text="🔑" FontSize="10" Foreground="Gold" Visibility="{Binding IsPrimaryKey, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,5,0"/>
+                                                        <TextBlock Text="{Binding Name}" FontSize="11" Foreground="#333333"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                                    <ItemsControl Grid.Row="1" ItemsSource="{Binding Columns}" Margin="5">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,2" Foreground="#333333"/>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                </Grid>
             </ScrollViewer>
         </TabItem>
 

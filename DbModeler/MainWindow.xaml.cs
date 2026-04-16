@@ -1,6 +1,7 @@
 ﻿using DbModeler.Models;
 using System.Windows;
 using System.Windows.Input;
+using DbModeler.ViewModels;
 
 namespace DbModeler
 {
@@ -39,6 +40,11 @@ namespace DbModeler
                 _draggedTable.CanvasX += deltaX;
                 _draggedTable.CanvasY += deltaY;
                 _lastMousePosition = currentMousePosition;
+
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.UpdateAllLines();
+                }
             }
         }
 
