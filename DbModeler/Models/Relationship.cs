@@ -17,5 +17,10 @@ namespace DbModeler.Models
 
         [ObservableProperty]
         private RelationshipType _type = RelationshipType.OneToMany;
+
+        [ObservableProperty] private double _startX;
+        [ObservableProperty] private double _startY;
+        [ObservableProperty] private double _endX;
+        [ObservableProperty] private double _endY;
     }
 }
