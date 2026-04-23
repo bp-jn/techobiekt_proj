@@ -49,10 +49,20 @@ namespace DbModeler.ViewModels
             }
 
             var newTable = new Table { Name = newName, CanvasX = 50, CanvasY = 50 };
+
+            var primaryKeyColumn = new Column
+            {
+                Name = "Id",
+                DataType = SqlDataType.Int, 
+                IsPrimaryKey = true,
+                IsNotNull = true
+            };
+            newTable.Columns.Add(primaryKeyColumn);
+
             Project.Tables.Add(newTable);
             SelectedTable = newTable;
         }
-
+    
         [RelayCommand]
         private void RemoveTable(Table? table)
         {
@@ -103,6 +113,47 @@ namespace DbModeler.ViewModels
                     rel.StartY = rel.SourceTable.CanvasY + 15;
                     rel.EndX = rel.TargetTable.CanvasX + 75;
                     rel.EndY = rel.TargetTable.CanvasY + 15;
+                }
+            }
+        }
+
+        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.Preserve
+        };
+
+        [RelayCommand]
+        private void ExportToJson()
+        {
+            var dialog = new SaveFileDialog { Filter = "Pliki projektu JSON (*.json)|*.json", FileName = "MojProjekt.json" };
+            if (dialog.ShowDialog() == true)
+            {
+                string json = JsonSerializer.Serialize(Project, _jsonOptions);
+                File.WriteAllText(dialog.FileName, json);
+            }
+        }
+
+        [RelayCommand]
+        private void ImportFromJson()
+        {
+            var dialog = new OpenFileDialog { Filter = "Pliki projektu JSON (*.json)|*.json" };
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string json = File.ReadAllText(dialog.FileName);
+                    var loadedProject = JsonSerializer.Deserialize<DatabaseProject>(json, _jsonOptions);
+                    if (loadedProject != null)
+                    {
+                        Project = loadedProject;
+                        UpdateAllLines(); 
+                    }
+                }
+                catch (Exception ex)
+                {
+                    
+                    System.Windows.MessageBox.Show($"Błąd podczas odczytu: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
             }
         }
