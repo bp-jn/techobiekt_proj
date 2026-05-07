@@ -20,5 +20,15 @@ namespace DbModeler.Models
 
         [ObservableProperty]
         private double _canvasY = 0;
+
+        [ObservableProperty]
+        private bool _isSelected = false;
+
+        [ObservableProperty]
+        private double _width;
+
+        [ObservableProperty]
+        private double _height;
+
     }
 }

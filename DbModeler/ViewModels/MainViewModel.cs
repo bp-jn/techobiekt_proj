@@ -35,6 +35,11 @@ namespace DbModeler.ViewModels
         {
             AddTable();
         }
+        partial void OnSelectedTableChanged(Table? oldValue, Table? newValue)
+        {
+            if (oldValue != null) oldValue.IsSelected = false; 
+            if (newValue != null) newValue.IsSelected = true;  
+        }
 
         [RelayCommand]
         private void AddTable()
@@ -203,6 +208,50 @@ namespace DbModeler.ViewModels
                 }
             }
             SqlDocument.Text = sb.ToString();
+        }
+        [RelayCommand]
+        private void AutoArrangeTables()
+        {
+            if (Project?.Tables == null || Project.Tables.Count == 0) return;
+
+            double startX = 50;
+            double startY = 50;
+            double spacingX = 40;
+            double spacingY = 40;
+            int maxColumns = 4;
+
+            double currentX = startX;
+            double currentY = startY;
+            double maxRowHeight = 0;
+
+            for (int i = 0; i < Project.Tables.Count; i++)
+            {
+                var table = Project.Tables[i];
+
+
+                double actualWidth = table.Width > 0 ? table.Width : 220;
+                double actualHeight = table.Height > 0 ? table.Height : 300;
+
+                if (i > 0 && i % maxColumns == 0)
+                {
+                    currentX = startX;
+                    currentY += maxRowHeight + spacingY;
+                    maxRowHeight = 0;
+                }
+
+                table.CanvasX = currentX;
+                table.CanvasY = currentY;
+
+
+                currentX += actualWidth + spacingX;
+
+                if (actualHeight > maxRowHeight)
+                {
+                    maxRowHeight = actualHeight;
+                }
+            }
+
+            UpdateAllLines();
         }
     }
 }
