@@ -26,6 +26,10 @@ namespace DbModeler
                 _draggedElement = element;
                 _lastMousePosition = e.GetPosition(this);
                 element.CaptureMouse();
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.SelectedTable = table;
+                }
             }
         }
 
