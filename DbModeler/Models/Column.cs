@@ -16,6 +16,8 @@ namespace DbModeler.Models
         private SqlDataType _dataType = SqlDataType.Int;
         
         [ObservableProperty]
+        private string _length = "50";
+        [ObservableProperty]
         private bool _isPrimaryKey = false;
         
         [ObservableProperty]

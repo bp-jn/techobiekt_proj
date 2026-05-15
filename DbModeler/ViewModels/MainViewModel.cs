@@ -91,6 +91,23 @@ namespace DbModeler.ViewModels
                 SelectedTable.Columns.Add(newColumn);
             }
         }
+        [RelayCommand]
+        private void AddColumnToSpecificTable(Table? table)
+        {
+            if (table != null)
+            {
+                table.Columns.Add(new Column { Name = $"Kolumna_{table.Columns.Count + 1}" });
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveColumn(Column? column)
+        {
+            if (column != null && SelectedTable != null)
+            {
+                SelectedTable.Columns.Remove(column);
+            }
+        }
 
         [RelayCommand]
         private void AddRelationship()
@@ -118,6 +135,9 @@ namespace DbModeler.ViewModels
                     rel.StartY = rel.SourceTable.CanvasY + 15;
                     rel.EndX = rel.TargetTable.CanvasX + 75;
                     rel.EndY = rel.TargetTable.CanvasY + 15;
+
+                    rel.MidX = (rel.StartX + rel.EndX) / 2;
+                    rel.MidY = (rel.StartY + rel.EndY) / 2;
                 }
             }
         }
@@ -176,9 +196,18 @@ namespace DbModeler.ViewModels
             foreach (var table in Project.Tables)
             {
                 sb.AppendLine($"CREATE TABLE {table.Name} (");
+
                 var columnsDefs = table.Columns.Select(c =>
                 {
-                    string def = $"    {c.Name} {c.DataType.ToString().ToUpper()}";
+                    string typeStr = c.DataType.ToString().ToUpper();
+
+
+                    if (!string.IsNullOrWhiteSpace(c.Length))
+                    {
+                        typeStr += $"({c.Length})";
+                    }
+
+                    string def = $"    {c.Name} {typeStr}";
                     if (c.IsPrimaryKey) def += " PRIMARY KEY";
                     else if (c.IsNotNull) def += " NOT NULL";
                     return def;
