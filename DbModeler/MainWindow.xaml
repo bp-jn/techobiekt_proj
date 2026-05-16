@@ -86,6 +86,8 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="180"/>
                             </Grid.RowDefinitions>
 
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
@@ -95,7 +97,7 @@
 
                             <Button Grid.Row="1" Content="Dodaj Kolumnę" Command="{Binding AddColumnCommand}" HorizontalAlignment="Left" Padding="5,5" Margin="0,0,0,10"/>
 
-                            <DataGrid Grid.Row="2" ItemsSource="{Binding SelectedTable.Columns}" AutoGenerateColumns="False" CanUserAddRows="False">
+                            <DataGrid Grid.Row="2" ItemsSource="{Binding SelectedTable.Columns}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Nazwa Kolumny" Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
 
@@ -103,14 +105,14 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ComboBox SelectedItem="{Binding DataType, UpdateSourceTrigger=PropertyChanged}" 
-                          ItemsSource="{Binding DataContext.AvailableDataTypes, RelativeSource={RelativeSource AncestorType=Window}}" 
-                          Margin="2"/>
+                                      ItemsSource="{Binding DataContext.AvailableDataTypes, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                      Margin="2"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
                                     <DataGridTextColumn Header="Rozmiar / Limit" Binding="{Binding Length, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
-                                    
+
                                     <DataGridCheckBoxColumn Header="Klucz Główny (PK)" Binding="{Binding IsPrimaryKey, UpdateSourceTrigger=PropertyChanged}"/>
                                     <DataGridCheckBoxColumn Header="Not Null" Binding="{Binding IsNotNull, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -118,13 +120,43 @@
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <Button Content="Usuń" Foreground="Red" Padding="5,0"
-                        Command="{Binding DataContext.RemoveColumnCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                        CommandParameter="{Binding}"/>
+                                    Command="{Binding DataContext.RemoveColumnCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"/>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
+
+                            <TextBlock Grid.Row="3" Text="Zdefiniowane Relacje:" FontWeight="Bold" Margin="0,15,0,5" Foreground="#3F51B5"/>
+
+                            <DataGrid Grid.Row="4" ItemsSource="{Binding Project.Relationships}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Background="White" BorderBrush="LightGray">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Tabela Źródłowa" Binding="{Binding SourceTable.Name, Mode=OneWay}" Width="*" IsReadOnly="True"/>
+
+                                    <DataGridTextColumn Header="Typ" Binding="{Binding Type, Mode=OneWay}" Width="100" IsReadOnly="True">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+
+                                    <DataGridTextColumn Header="Tabela Docelowa" Binding="{Binding TargetTable.Name, Mode=OneWay}" Width="*" IsReadOnly="True"/>
+
+                                    <DataGridTemplateColumn Width="60">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="Usuń" Foreground="Red" Padding="5,0"
+                                    Command="{Binding DataContext.RemoveRelationshipCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
                         </Grid>
                     </Border>
                 </Grid>
@@ -132,16 +164,49 @@
 
             <TabItem Header="2. Tryb Diagramu">
                 <Grid Background="#F0F0F0">
-                    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Panel.ZIndex="10">
-                        <Button Content="+ Dodaj Tabelę" Command="{Binding AddTableCommand}" Background="#4CAF50" Foreground="White" FontWeight="Bold" Padding="10,5">
-                            <Button.Effect>
-                                <DropShadowEffect BlurRadius="5" Opacity="0.3"/>
-                            </Button.Effect>
-                        </Button>
-                    </StackPanel>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <Border Grid.Row="0" Background="White" BorderBrush="#D1D1D1" BorderThickness="0,0,0,1" Padding="10,8" Panel.ZIndex="10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                            <Button Content="+ Dodaj Tabelę" Command="{Binding AddTableCommand}" 
+                Background="#4CAF50" Foreground="White" FontWeight="Bold" Padding="12,6" Margin="0,0,10,0"/>
+
+                            <Button Content="🗑 Usuń Tabelę" 
+                Command="{Binding RemoveTableCommand}" 
+                CommandParameter="{Binding SelectedTable}"
+                Background="#F44336" Foreground="White" FontWeight="Bold" Padding="12,6" Margin="0,0,25,0">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Opacity" Value="1"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedTable}" Value="{x:Null}">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+
+                            <Border Background="#F9F9F9" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="4" Padding="5">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Tryb łączenia (🔗): " VerticalAlignment="Center" Margin="5,0,10,0" FontWeight="SemiBold" Foreground="#555"/>
+                                    <ComboBox ItemsSource="{Binding AvailableRelationTypes}" 
+                          SelectedItem="{Binding SelectedRelType}" 
+                          Width="130" Padding="4"/>
+                                </StackPanel>
+                            </Border>
+
+                        </StackPanel>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid Width="3000" Height="3000">
+
                             <ItemsControl ItemsSource="{Binding Project.Relationships}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -152,26 +217,31 @@
                                     <DataTemplate>
                                         <Canvas>
                                             <Line x:Name="RelLine" 
-                      X1="{Binding StartX}" Y1="{Binding StartY}" 
-                      X2="{Binding EndX}" Y2="{Binding EndY}" 
-                      StrokeThickness="3" Panel.ZIndex="0"/>
+      Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
+      X1="{Binding StartX}" Y1="{Binding StartY}" X2="{Binding EndX}" Y2="{Binding EndY}" 
+      StrokeThickness="3" Cursor="Hand">
+                                                <Line.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Usuń relację" Foreground="Red" 
+                      Command="{Binding PlacementTarget.Tag.RemoveRelationshipCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                      CommandParameter="{Binding}"/>
+                                                    </ContextMenu>
+                                                </Line.ContextMenu>
+                                            </Line>
 
                                             <Border x:Name="RelBadge" Background="White" BorderThickness="2" CornerRadius="8" Padding="5,2" 
-                        Canvas.Left="{Binding MidX}" Canvas.Top="{Binding MidY}" 
-                        Margin="-20,-10,0,0" Panel.ZIndex="1">
+                                        Canvas.Left="{Binding MidX}" Canvas.Top="{Binding MidY}" Margin="-20,-10,0,0" Panel.ZIndex="1">
                                                 <TextBlock x:Name="RelText" FontSize="11" FontWeight="Bold"/>
                                             </Border>
                                         </Canvas>
 
                                         <DataTemplate.Triggers>
-
                                             <DataTrigger Binding="{Binding Type}" Value="OneToOne">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#2196F3"/>
                                                 <Setter TargetName="RelBadge" Property="BorderBrush" Value="#2196F3"/>
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#2196F3"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="1 : 1"/>
                                             </DataTrigger>
-
                                             <DataTrigger Binding="{Binding Type}" Value="OneToMany">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#FF9800"/>
                                                 <Setter TargetName="RelLine" Property="StrokeDashArray" Value="4,4"/>
@@ -179,7 +249,6 @@
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#FF9800"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="1 : N"/>
                                             </DataTrigger>
-
                                             <DataTrigger Binding="{Binding Type}" Value="ManyToMany">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#E91E63"/>
                                                 <Setter TargetName="RelLine" Property="StrokeDashArray" Value="1,2"/>
@@ -187,7 +256,6 @@
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#E91E63"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="N : M"/>
                                             </DataTrigger>
-
                                         </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -199,20 +267,17 @@
                                         <Canvas />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
-
                                 <ItemsControl.ItemContainerStyle>
                                     <Style TargetType="ContentPresenter">
                                         <Setter Property="Canvas.Left" Value="{Binding CanvasX, Mode=TwoWay}" />
                                         <Setter Property="Canvas.Top" Value="{Binding CanvasY, Mode=TwoWay}" />
                                     </Style>
                                 </ItemsControl.ItemContainerStyle>
-
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border x:Name="TableBorder" BorderBrush="#3F51B5" BorderThickness="2" Background="White" CornerRadius="5" Width="170" Cursor="SizeAll"
-                                    MouseLeftButtonDown="TableBlock_MouseDown" 
-                                    MouseMove="TableBlock_MouseMove" 
-                                    MouseLeftButtonUp="TableBlock_MouseUp">
+                                        <Border x:Name="TableBorder" BorderBrush="#3F51B5" BorderThickness="2" Background="White" CornerRadius="5" Width="200" Cursor="SizeAll"
+                                    MouseLeftButtonDown="TableBlock_MouseDown" MouseMove="TableBlock_MouseMove" MouseLeftButtonUp="TableBlock_MouseUp">
+
                                             <Grid>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
@@ -224,22 +289,47 @@
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" Cursor="IBeam" Margin="0,0,5,0"/>
-                                                        <Button Grid.Column="1" Content="+" Width="20" Height="20" Background="White" Foreground="#3F51B5" FontWeight="Bold" Padding="0" Cursor="Hand"
-                                                    Command="{Binding DataContext.AddColumnToSpecificTableCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
-                                                    CommandParameter="{Binding}"/>
+
+                                                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="White" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,5,0"/>
+
+                                                        <Button Grid.Column="1" Content="🔗" Width="22" Background="Transparent" Foreground="LightGreen" BorderThickness="0" Margin="0,0,5,0" ToolTip="Połącz z inną tabelą" Cursor="Hand"
+                                                    Command="{Binding DataContext.SetAsSourceCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
+
+                                                        <Button Grid.Column="2" Content="+" Width="20" Command="{Binding DataContext.AddColumnToSpecificTableCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" />
                                                     </Grid>
                                                 </Border>
 
                                                 <ItemsControl Grid.Row="1" ItemsSource="{Binding Columns}" Margin="5">
                                                     <ItemsControl.ItemTemplate>
                                                         <DataTemplate>
-                                                            <StackPanel Orientation="Horizontal" Margin="0,2">
-                                                                <TextBlock Text="🔑" FontSize="10" Foreground="Gold" Visibility="{Binding IsPrimaryKey, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,5,0"/>
-                                                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="12" Foreground="#333333" Cursor="IBeam"/>
-                                                                <TextBlock Text="{Binding DataType}" FontSize="10" Foreground="Gray" Margin="5,2,0,0"/>
-                                                            </StackPanel>
+                                                            <Grid Margin="0,2" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="Auto" />
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <Grid.ContextMenu>
+                                                                    <ContextMenu>
+                                                                        <MenuItem Header="Usuń Kolumnę" Foreground="Red"
+                      Command="{Binding PlacementTarget.Tag.RemoveColumnCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                      CommandParameter="{Binding}" />
+                                                                    </ContextMenu>
+                                                                </Grid.ContextMenu>
+
+                                                                <TextBlock Text="🔑" Visibility="{Binding IsPrimaryKey, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,3,0"/>
+                                                                <TextBox Grid.Column="1" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" FontSize="11" VerticalAlignment="Center"/>
+
+                                                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                                                    <ComboBox SelectedItem="{Binding DataType, UpdateSourceTrigger=PropertyChanged}" 
+                  ItemsSource="{Binding DataContext.AvailableDataTypes, RelativeSource={RelativeSource AncestorType=Window}}"
+                  FontSize="9" BorderThickness="0" Background="#F0F0F0" Margin="2,0"/>
+                                                                    <TextBox Text="{Binding Length, UpdateSourceTrigger=PropertyChanged}" 
+                 FontSize="9" Width="25" Background="#F9F9F9" BorderBrush="LightGray" VerticalAlignment="Center"/>
+                                                                </StackPanel>
+                                                            </Grid>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
@@ -252,10 +342,17 @@
                                                 <Setter TargetName="HeaderBorder" Property="Background" Value="#FF9800"/>
                                                 <Setter TargetName="TableBorder" Property="BorderThickness" Value="3"/>
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsConnectingWaiting}" Value="True">
+                                                <Setter TargetName="TableBorder" Property="BorderBrush" Value="#4CAF50"/>
+                                                <Setter TargetName="HeaderBorder" Property="Background" Value="#4CAF50"/>
+                                                <Setter TargetName="TableBorder" Property="BorderThickness" Value="3"/>
+                                            </DataTrigger>
                                         </DataTemplate.Triggers>
+
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
                         </Grid>
                     </ScrollViewer>
                 </Grid>

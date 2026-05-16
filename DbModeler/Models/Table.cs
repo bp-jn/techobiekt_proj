@@ -30,5 +30,7 @@ namespace DbModeler.Models
         [ObservableProperty]
         private double _height;
 
+        [ObservableProperty]
+        private bool _isConnectingWaiting = false;
     }
 }

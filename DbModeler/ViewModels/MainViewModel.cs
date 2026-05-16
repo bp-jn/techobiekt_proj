@@ -37,8 +37,34 @@ namespace DbModeler.ViewModels
         }
         partial void OnSelectedTableChanged(Table? oldValue, Table? newValue)
         {
-            if (oldValue != null) oldValue.IsSelected = false; 
-            if (newValue != null) newValue.IsSelected = true;  
+            if (oldValue != null) oldValue.IsSelected = false;
+            if (newValue != null) newValue.IsSelected = true;
+
+            if (SelectedSourceTable != null && newValue != null && SelectedSourceTable != newValue)
+            {
+                SelectedTargetTable = newValue;
+
+                var rel = new Relationship
+                {
+                    SourceTable = SelectedSourceTable,
+                    TargetTable = SelectedTargetTable,
+                    Type = SelectedRelType
+                };
+                Project.Relationships.Add(rel);
+                UpdateAllLines();
+
+                SelectedSourceTable.IsConnectingWaiting = false;
+                SelectedSourceTable = null;
+                SelectedTargetTable = null;
+            }
+        }
+        [RelayCommand]
+        private void ChangeRelType(object parameter)
+        {
+
+            if (parameter is string typeStr && Enum.TryParse(typeStr, out RelationshipType newType))
+            {
+            }
         }
 
         [RelayCommand]
@@ -58,7 +84,7 @@ namespace DbModeler.ViewModels
             var primaryKeyColumn = new Column
             {
                 Name = "Id",
-                DataType = SqlDataType.Int, 
+                DataType = SqlDataType.Int,
                 IsPrimaryKey = true,
                 IsNotNull = true
             };
@@ -67,7 +93,7 @@ namespace DbModeler.ViewModels
             Project.Tables.Add(newTable);
             SelectedTable = newTable;
         }
-    
+
         [RelayCommand]
         private void RemoveTable(Table? table)
         {
@@ -103,9 +129,16 @@ namespace DbModeler.ViewModels
         [RelayCommand]
         private void RemoveColumn(Column? column)
         {
-            if (column != null && SelectedTable != null)
+            if (column != null)
             {
-                SelectedTable.Columns.Remove(column);
+                foreach (var table in Project.Tables)
+                {
+                    if (table.Columns.Contains(column))
+                    {
+                        table.Columns.Remove(column);
+                        break;
+                    }
+                }
             }
         }
 
@@ -125,23 +158,65 @@ namespace DbModeler.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void RemoveRelationship(Relationship? rel)
+        {
+            if (rel != null)
+            {
+                Project.Relationships.Remove(rel);
+            }
+        }
+
+        [RelayCommand]
+        private void SetAsSource(Table? table)
+        {
+            if (table != null)
+            {
+
+                if (SelectedSourceTable != null) SelectedSourceTable.IsConnectingWaiting = false;
+
+                SelectedSourceTable = table;
+                table.IsConnectingWaiting = true;
+            }
+        }
+
+        [RelayCommand]
+        private void ConnectAsTarget(Table? table)
+        {
+            if (SelectedSourceTable != null && table != null && SelectedSourceTable != table)
+            {
+                SelectedTargetTable = table;
+
+                var rel = new Relationship
+                {
+                    SourceTable = SelectedSourceTable,
+                    TargetTable = SelectedTargetTable,
+                    Type = SelectedRelType
+                };
+
+                Project.Relationships.Add(rel);
+                UpdateAllLines();
+
+                SelectedSourceTable = null;
+            }
+        }
+
         public void UpdateAllLines()
         {
             foreach (var rel in Project.Relationships)
             {
                 if (rel.SourceTable != null && rel.TargetTable != null)
                 {
-                    rel.StartX = rel.SourceTable.CanvasX + 75;
-                    rel.StartY = rel.SourceTable.CanvasY + 15;
-                    rel.EndX = rel.TargetTable.CanvasX + 75;
-                    rel.EndY = rel.TargetTable.CanvasY + 15;
+                    rel.StartX = rel.SourceTable.CanvasX + 100;
+                    rel.StartY = rel.SourceTable.CanvasY + 20;
+                    rel.EndX = rel.TargetTable.CanvasX + 100;
+                    rel.EndY = rel.TargetTable.CanvasY + 20;
 
                     rel.MidX = (rel.StartX + rel.EndX) / 2;
                     rel.MidY = (rel.StartY + rel.EndY) / 2;
                 }
             }
         }
-
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -172,12 +247,12 @@ namespace DbModeler.ViewModels
                     if (loadedProject != null)
                     {
                         Project = loadedProject;
-                        UpdateAllLines(); 
+                        UpdateAllLines();
                     }
                 }
                 catch (Exception ex)
                 {
-                    
+
                     System.Windows.MessageBox.Show($"Błąd podczas odczytu: {ex.Message}", "Błąd", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
             }
