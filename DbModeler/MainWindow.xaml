@@ -256,6 +256,21 @@
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#E91E63"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="N : M"/>
                                             </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="InheritanceSingleTable">
+                                                <Setter TargetName="RelLine" Property="Stroke" Value="#9C27B0"/>
+                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="2,2"/>
+                                                <Setter TargetName="RelBadge" Property="BorderBrush" Value="#9C27B0"/>
+                                                <Setter TargetName="RelText" Property="Foreground" Value="#9C27B0"/>
+                                                <Setter TargetName="RelText" Property="Text" Value="STI"/>
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding Type}" Value="InheritanceClassTable">
+                                                <Setter TargetName="RelLine" Property="Stroke" Value="#009688"/>
+                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="2,2"/>
+                                                <Setter TargetName="RelBadge" Property="BorderBrush" Value="#009688"/>
+                                                <Setter TargetName="RelText" Property="Foreground" Value="#009688"/>
+                                                <Setter TargetName="RelText" Property="Text" Value="CTI"/>
+                                            </DataTrigger>
                                         </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>

@@ -18,6 +18,8 @@ namespace DbModeler.Models
     {
         OneToOne,
         OneToMany,
-        ManyToMany
+        ManyToMany,
+        InheritanceSingleTable,
+        InheritanceClassTable
     }
 }

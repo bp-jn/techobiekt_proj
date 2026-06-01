@@ -268,19 +268,59 @@ namespace DbModeler.ViewModels
             sb.AppendLine($"-- Wygenerowano: {DateTime.Now}");
             sb.AppendLine("-- ==========================================\n");
 
-            foreach (var table in Project.Tables)
+            var stiRels = Project.Relationships.Where(r => r.Type == RelationshipType.InheritanceSingleTable).ToList();
+            var ctiRels = Project.Relationships.Where(r => r.Type == RelationshipType.InheritanceClassTable).ToList();
+
+            var stiChildren = stiRels.Select(r => r.TargetTable).Distinct().ToList();
+            var ctiChildren = ctiRels.Select(r => r.TargetTable).Distinct().ToList();
+
+            var allInheritanceRels = stiRels.Concat(ctiRels).ToList();
+            var allChildren = allInheritanceRels.Select(r => r.TargetTable).Distinct().ToList();
+            var allParents = allInheritanceRels.Select(r => r.SourceTable).Distinct().ToList();
+
+            var rootTables = allParents.Where(p => !allChildren.Contains(p)).ToList();
+
+            Table GetStiRootTable(Table t)
+            {
+                var parentRel = stiRels.FirstOrDefault(r => r.TargetTable == t);
+                return parentRel != null && parentRel.SourceTable != null ? GetStiRootTable(parentRel.SourceTable) : t;
+            }
+
+            var tablesToCreate = Project.Tables.Where(t => !stiChildren.Contains(t)).ToList();
+
+            foreach (var table in tablesToCreate)
             {
                 sb.AppendLine($"CREATE TABLE {table.Name} (");
 
-                var columnsDefs = table.Columns.Select(c =>
+                var allColumns = new List<Column>(table.Columns);
+
+                if (rootTables.Contains(table))
+                {
+                    allColumns.Insert(1, new Column { Name = "type", DataType = SqlDataType.Varchar, Length = "31", IsNotNull = true });
+                }
+
+                var currentStiChildren = stiRels.Where(r => r.SourceTable == table).Select(r => r.TargetTable).ToList();
+                if (currentStiChildren.Any())
+                {
+                    var queue = new Queue<Table>(currentStiChildren);
+                    while (queue.Count > 0)
+                    {
+                        var child = queue.Dequeue();
+                        foreach (var col in child.Columns.Where(c => !c.IsPrimaryKey))
+                        {
+                            var inheritedCol = new Column { Name = col.Name, DataType = col.DataType, Length = col.Length, IsNotNull = false };
+                            allColumns.Add(inheritedCol);
+                        }
+
+                        var nextChildren = stiRels.Where(r => r.SourceTable == child).Select(r => r.TargetTable).ToList();
+                        foreach (var nc in nextChildren) queue.Enqueue(nc);
+                    }
+                }
+
+                var columnsDefs = allColumns.Select(c =>
                 {
                     string typeStr = c.DataType.ToString().ToUpper();
-
-
-                    if (!string.IsNullOrWhiteSpace(c.Length))
-                    {
-                        typeStr += $"({c.Length})";
-                    }
+                    if (!string.IsNullOrWhiteSpace(c.Length)) typeStr += $"({c.Length})";
 
                     string def = $"    {c.Name} {typeStr}";
                     if (c.IsPrimaryKey) def += " PRIMARY KEY";
@@ -296,21 +336,41 @@ namespace DbModeler.ViewModels
             sb.AppendLine("-- RELACJE (Klucze Obce)");
             sb.AppendLine("-- ==========================================\n");
 
-            foreach (var rel in Project.Relationships)
+            foreach (var rel in Project.Relationships.Where(r => r.Type != RelationshipType.InheritanceSingleTable && r.Type != RelationshipType.InheritanceClassTable))
             {
                 if (rel.SourceTable != null && rel.TargetTable != null)
                 {
-                    var pkCol = rel.SourceTable.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+                    var actualSource = GetStiRootTable(rel.SourceTable);
+                    var actualTarget = GetStiRootTable(rel.TargetTable);
+
+                    var pkCol = actualSource.Columns.FirstOrDefault(c => c.IsPrimaryKey);
                     string pkName = pkCol != null ? pkCol.Name : "ID";
 
                     if (rel.Type == RelationshipType.OneToMany)
                     {
-                        sb.AppendLine($"ALTER TABLE {rel.TargetTable.Name}");
-                        sb.AppendLine($"ADD CONSTRAINT FK_{rel.TargetTable.Name}_{rel.SourceTable.Name}");
-                        sb.AppendLine($"FOREIGN KEY ({rel.SourceTable.Name}Id) REFERENCES {rel.SourceTable.Name}({pkName});\n");
+                        sb.AppendLine($"ALTER TABLE {actualTarget.Name}");
+                        sb.AppendLine($"ADD CONSTRAINT FK_{actualTarget.Name}_{actualSource.Name}");
+                        sb.AppendLine($"FOREIGN KEY ({actualSource.Name}Id) REFERENCES {actualSource.Name}({pkName});\n");
                     }
                 }
             }
+
+            foreach (var rel in ctiRels)
+            {
+                if (rel.SourceTable != null && rel.TargetTable != null)
+                {
+                    var parentPk = rel.SourceTable.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+                    var childPk = rel.TargetTable.Columns.FirstOrDefault(c => c.IsPrimaryKey);
+
+                    string parentPkName = parentPk != null ? parentPk.Name : "ID";
+                    string childPkName = childPk != null ? childPk.Name : "ID";
+
+                    sb.AppendLine($"ALTER TABLE {rel.TargetTable.Name}");
+                    sb.AppendLine($"ADD CONSTRAINT FK_CTI_{rel.TargetTable.Name}_{rel.SourceTable.Name}");
+                    sb.AppendLine($"FOREIGN KEY ({childPkName}) REFERENCES {rel.SourceTable.Name}({parentPkName});\n");
+                }
+            }
+
             SqlDocument.Text = sb.ToString();
         }
         [RelayCommand]
