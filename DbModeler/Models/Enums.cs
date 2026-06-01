@@ -20,6 +20,7 @@ namespace DbModeler.Models
         OneToMany,
         ManyToMany,
         InheritanceSingleTable,
-        InheritanceClassTable
+        InheritanceClassTable,
+        InheritanceConcreteTable
     }
 }
