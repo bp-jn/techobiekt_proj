@@ -24,5 +24,7 @@ namespace DbModeler.Models
         [ObservableProperty] private double _endY;
         [ObservableProperty] private double _midX;
         [ObservableProperty] private double _midY;
+
+        [ObservableProperty] private string _pathData;
     }
 }

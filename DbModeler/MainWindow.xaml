@@ -216,21 +216,21 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Canvas>
-                                            <Line x:Name="RelLine" 
-      Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
-      X1="{Binding StartX}" Y1="{Binding StartY}" X2="{Binding EndX}" Y2="{Binding EndY}" 
-      StrokeThickness="3" Cursor="Hand">
-                                                <Line.ContextMenu>
+                                            <Path x:Name="RelLine" 
+                                                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                  Data="{Binding PathData}" 
+                                                  StrokeThickness="2" StrokeLineJoin="Round" Cursor="Hand">
+                                                <Path.ContextMenu>
                                                     <ContextMenu>
                                                         <MenuItem Header="Usuń relację" Foreground="Red" 
-                      Command="{Binding PlacementTarget.Tag.RemoveRelationshipCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
-                      CommandParameter="{Binding}"/>
+                                                                  Command="{Binding PlacementTarget.Tag.RemoveRelationshipCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}" 
+                                                                  CommandParameter="{Binding}"/>
                                                     </ContextMenu>
-                                                </Line.ContextMenu>
-                                            </Line>
+                                                </Path.ContextMenu>
+                                            </Path>
 
                                             <Border x:Name="RelBadge" Background="White" BorderThickness="2" CornerRadius="8" Padding="5,2" 
-                                        Canvas.Left="{Binding MidX}" Canvas.Top="{Binding MidY}" Margin="-20,-10,0,0" Panel.ZIndex="1">
+                                                    Canvas.Left="{Binding MidX}" Canvas.Top="{Binding MidY}" Margin="-20,-10,0,0" Panel.ZIndex="1">
                                                 <TextBlock x:Name="RelText" FontSize="11" FontWeight="Bold"/>
                                             </Border>
                                         </Canvas>
@@ -244,36 +244,33 @@
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Type}" Value="OneToMany">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#FF9800"/>
-                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="4,4"/>
                                                 <Setter TargetName="RelBadge" Property="BorderBrush" Value="#FF9800"/>
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#FF9800"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="1 : N"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Type}" Value="ManyToMany">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#E91E63"/>
-                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="1,2"/>
                                                 <Setter TargetName="RelBadge" Property="BorderBrush" Value="#E91E63"/>
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#E91E63"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="N : M"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Type}" Value="InheritanceSingleTable">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#9C27B0"/>
-                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="2,2"/>
+                                                <Setter TargetName="RelLine" Property="Fill" Value="White"/>
                                                 <Setter TargetName="RelBadge" Property="BorderBrush" Value="#9C27B0"/>
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#9C27B0"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="STI"/>
                                             </DataTrigger>
-
                                             <DataTrigger Binding="{Binding Type}" Value="InheritanceClassTable">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#009688"/>
-                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="2,2"/>
+                                                <Setter TargetName="RelLine" Property="Fill" Value="White"/>
                                                 <Setter TargetName="RelBadge" Property="BorderBrush" Value="#009688"/>
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#009688"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="CTI"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding Type}" Value="InheritanceConcreteTable">
                                                 <Setter TargetName="RelLine" Property="Stroke" Value="#FF5722"/>
-                                                <Setter TargetName="RelLine" Property="StrokeDashArray" Value="2,2"/>
+                                                <Setter TargetName="RelLine" Property="Fill" Value="White"/>
                                                 <Setter TargetName="RelBadge" Property="BorderBrush" Value="#FF5722"/>
                                                 <Setter TargetName="RelText" Property="Foreground" Value="#FF5722"/>
                                                 <Setter TargetName="RelText" Property="Text" Value="TPC"/>
@@ -298,7 +295,8 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border x:Name="TableBorder" BorderBrush="#3F51B5" BorderThickness="2" Background="White" CornerRadius="5" Width="200" Cursor="SizeAll"
-                                    MouseLeftButtonDown="TableBlock_MouseDown" MouseMove="TableBlock_MouseMove" MouseLeftButtonUp="TableBlock_MouseUp">
+        MouseLeftButtonDown="TableBlock_MouseDown" MouseMove="TableBlock_MouseMove" MouseLeftButtonUp="TableBlock_MouseUp" 
+        SizeChanged="TableBlock_SizeChanged">
 
                                             <Grid>
                                                 <Grid.RowDefinitions>
@@ -431,10 +429,10 @@
                     <TextBlock Text="Kliknij przycisk 'Generuj Skrypt SQL' na górnym pasku, aby zobaczyć kod." 
                                Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center" Panel.ZIndex="0"/>
 
-                    <avalonEdit:TextEditor Document="{Binding SqlDocument}" 
-                                           SyntaxHighlighting="TSQL" 
+                    <avalonEdit:TextEditor x:Name="SqlEditor" 
+                                           Document="{Binding SqlDocument}" 
                                            FontFamily="Consolas" 
-                                           FontSize="14" 
+                                           FontSize="16" 
                                            ShowLineNumbers="True" 
                                            Background="#1E1E1E" 
                                            Foreground="#D4D4D4"

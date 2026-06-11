@@ -2,6 +2,11 @@
 using System.Windows;
 using System.Windows.Input;
 using DbModeler.ViewModels;
+using ICSharpCode.AvalonEdit.Highlighting;
+using ICSharpCode.AvalonEdit.Highlighting.Xshd;
+using System.IO;
+using System.Reflection;
+using System.Xml;
 
 namespace DbModeler
 {
@@ -15,6 +20,27 @@ namespace DbModeler
         public MainWindow()
         {
             InitializeComponent();
+            LoadCustomSyntax();
+        }
+        private void LoadCustomSyntax()
+        {
+            string resourceName = "DbModeler.SyntaxSql.xshd";
+            var assembly = Assembly.GetExecutingAssembly();
+
+            using (Stream? stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream != null)
+                {
+                    using (XmlTextReader reader = new XmlTextReader(stream))
+                    {
+                        SqlEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Nie znaleziono pliku kolorowania składni.");
+                }
+            }
         }
 
         private void TableBlock_MouseDown(object sender, MouseButtonEventArgs e)
@@ -60,6 +86,19 @@ namespace DbModeler
                 _draggedElement.ReleaseMouseCapture();
                 _draggedTable = null;
                 _draggedElement = null;
+            }
+        }
+        private void TableBlock_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.DataContext is Table table)
+            {
+                table.Width = e.NewSize.Width;
+                table.Height = e.NewSize.Height;
+
+                if (DataContext is MainViewModel vm)
+                {
+                    vm.UpdateAllLines();
+                }
             }
         }
     }

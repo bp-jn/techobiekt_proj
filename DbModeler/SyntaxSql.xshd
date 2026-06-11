@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="SyntaxSql" extensions=".sql" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+    <Color name="Comment" foreground="#6A9955" />
+    <Color name="String" foreground="#CE9178" />
+    <Color name="Keyword" foreground="#569CD6" fontWeight="bold" />
+    <Color name="DataType" foreground="#4EC9B0" />
+    <Color name="Number" foreground="#B5CEA8" />
+
+    <RuleSet ignoreCase="true">
+        <Span color="Comment">
+            <Begin>--</Begin>
+        </Span>
+        
+        <Span color="String">
+            <Begin>'</Begin>
+            <End>'</End>
+        </Span>
+        
+        <Keywords color="Keyword">
+            <Word>CREATE</Word>
+            <Word>TABLE</Word>
+            <Word>ALTER</Word>
+            <Word>ADD</Word>
+            <Word>CONSTRAINT</Word>
+            <Word>FOREIGN</Word>
+            <Word>KEY</Word>
+            <Word>PRIMARY</Word>
+            <Word>REFERENCES</Word>
+            <Word>NOT</Word>
+            <Word>NULL</Word>
+        </Keywords>
+        
+        <Keywords color="DataType">
+            <Word>INT</Word>
+            <Word>VARCHAR</Word>
+            <Word>NVARCHAR</Word>
+            <Word>DATE</Word>
+            <Word>DATETIME</Word>
+            <Word>BIT</Word>
+        </Keywords>
+        
+        <Rule color="Number">
+            \b0[xX][0-9a-fA-F]+|(\b\d+(\.[0-9]+)?|\.[0-9]+)([eE][+-]?[0-9]+)?
+        </Rule>
+    </RuleSet>
+</SyntaxDefinition>

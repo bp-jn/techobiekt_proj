@@ -213,16 +213,104 @@ namespace DbModeler.ViewModels
             {
                 if (rel.SourceTable != null && rel.TargetTable != null)
                 {
-                    rel.StartX = rel.SourceTable.CanvasX + 100;
-                    rel.StartY = rel.SourceTable.CanvasY + 20;
-                    rel.EndX = rel.TargetTable.CanvasX + 100;
-                    rel.EndY = rel.TargetTable.CanvasY + 20;
+                    double w1 = rel.SourceTable.Width > 0 ? rel.SourceTable.Width : 200;
+                    double h1 = rel.SourceTable.Height > 0 ? rel.SourceTable.Height : 150;
+                    double w2 = rel.TargetTable.Width > 0 ? rel.TargetTable.Width : 200;
+                    double h2 = rel.TargetTable.Height > 0 ? rel.TargetTable.Height : 150;
+
+                    double cx1 = rel.SourceTable.CanvasX + w1 / 2;
+                    double cy1 = rel.SourceTable.CanvasY + h1 / 2;
+                    double cx2 = rel.TargetTable.CanvasX + w2 / 2;
+                    double cy2 = rel.TargetTable.CanvasY + h2 / 2;
+
+                    var startEdge = GetEdgePoint(cx1, cy1, w1, h1, cx2, cy2);
+                    var endEdge = GetEdgePoint(cx2, cy2, w2, h2, cx1, cy1);
+
+                    rel.StartX = startEdge.X;
+                    rel.StartY = startEdge.Y;
+                    rel.EndX = endEdge.X;
+                    rel.EndY = endEdge.Y;
 
                     rel.MidX = (rel.StartX + rel.EndX) / 2;
                     rel.MidY = (rel.StartY + rel.EndY) / 2;
+
+                    rel.PathData = GenerateUmlPath(rel);
                 }
             }
         }
+
+        private (double X, double Y) GetEdgePoint(double cx, double cy, double w, double h, double targetX, double targetY)
+        {
+            double dx = targetX - cx;
+            double dy = targetY - cy;
+
+            if (Math.Abs(dx) < 0.001 && Math.Abs(dy) < 0.001) return (cx, cy);
+
+            double tx = (w / 2 + 2) / Math.Abs(dx);
+            double ty = (h / 2 + 2) / Math.Abs(dy);
+
+            double t = Math.Min(tx, ty);
+
+            return (cx + dx * t, cy + dy * t);
+        }
+
+        private string GenerateUmlPath(Relationship rel)
+        {
+            double x1 = rel.StartX;
+            double y1 = rel.StartY;
+            double x2 = rel.EndX;
+            double y2 = rel.EndY;
+
+            double angle = Math.Atan2(y2 - y1, x2 - x1);
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+
+            double arrowSize = 15;
+
+
+            if (rel.Type == RelationshipType.InheritanceSingleTable ||
+                rel.Type == RelationshipType.InheritanceClassTable ||
+                rel.Type == RelationshipType.InheritanceConcreteTable)
+            {
+                double triangleHeight = arrowSize * 1.2;
+
+
+                double baseBx = x1 + triangleHeight * Math.Cos(angle);
+                double baseBy = y1 + triangleHeight * Math.Sin(angle);
+
+                double halfBase = arrowSize * 0.7; 
+                double anglePerp = angle - Math.PI / 2;
+                double ax1 = baseBx + halfBase * Math.Cos(anglePerp);
+                double ay1 = baseBy + halfBase * Math.Sin(anglePerp);
+                double ax2 = baseBx - halfBase * Math.Cos(anglePerp);
+                double ay2 = baseBy - halfBase * Math.Sin(anglePerp);
+
+                string line = $"M {x2.ToString(inv)},{y2.ToString(inv)} L {baseBx.ToString(inv)},{baseBy.ToString(inv)} ";
+                string triangle = $"M {x1.ToString(inv)},{y1.ToString(inv)} L {ax1.ToString(inv)},{ay1.ToString(inv)} L {ax2.ToString(inv)},{ay2.ToString(inv)} Z";
+
+                return line + triangle;
+            }
+            else if (rel.Type == RelationshipType.OneToMany)
+            {
+                double angleLeft = angle - Math.PI / 6;
+                double angleRight = angle + Math.PI / 6;
+
+                double ax1 = x2 - arrowSize * Math.Cos(angleLeft);
+                double ay1 = y2 - arrowSize * Math.Sin(angleLeft);
+                double ax2 = x2 - arrowSize * Math.Cos(angleRight);
+                double ay2 = y2 - arrowSize * Math.Sin(angleRight);
+
+                string line = $"M {x1.ToString(inv)},{y1.ToString(inv)} L {x2.ToString(inv)},{y2.ToString(inv)} ";
+                string arrow = $"M {ax1.ToString(inv)},{ay1.ToString(inv)} L {x2.ToString(inv)},{y2.ToString(inv)} L {ax2.ToString(inv)},{ay2.ToString(inv)}";
+
+                return line + arrow;
+            }
+
+            else
+            {
+                return $"M {x1.ToString(inv)},{y1.ToString(inv)} L {x2.ToString(inv)},{y2.ToString(inv)} ";
+            }
+        }
+
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
