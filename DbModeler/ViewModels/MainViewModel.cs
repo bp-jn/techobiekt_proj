@@ -79,7 +79,12 @@ namespace DbModeler.ViewModels
                 newName = $"NowaTabela_{counter}";
             }
 
-            var newTable = new Table { Name = newName, CanvasX = 50, CanvasY = 50 };
+            int offsetStep = 30;
+            int multiplier = Project.Tables.Count % 10;
+            double spawnX = 50 + (multiplier * offsetStep);
+            double spawnY = 50 + (multiplier * offsetStep);
+
+            var newTable = new Table { Name = newName, CanvasX = spawnX, CanvasY = spawnY };
 
             var primaryKeyColumn = new Column
             {
@@ -177,6 +182,7 @@ namespace DbModeler.ViewModels
 
                 SelectedSourceTable = table;
                 table.IsConnectingWaiting = true;
+                SelectedTable = table;
             }
         }
 
