@@ -101,5 +101,25 @@ namespace DbModeler
                 }
             }
         }
+        private void ExportToMySQL_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.GenerateSqlCommand.Execute(null);
+
+                string sql = vm.SqlDocument.Text;
+
+                if (string.IsNullOrWhiteSpace(sql))
+                {
+                    MessageBox.Show("Najpierw dodaj tabele do projektu.", "Brak danych",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var dialog = new MySqlExportDialog(sql) { Owner = this };
+                dialog.ShowDialog();
+            }
+        }
+
     }
 }

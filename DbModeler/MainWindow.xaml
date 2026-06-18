@@ -21,6 +21,7 @@
                 <Button Content="Zapisz Projekt (JSON)" Command="{Binding ExportToJsonCommand}" Background="White" Padding="10,5" Margin="0,0,10,0"/>
                 <Button Content="Wczytaj Projekt (JSON)" Command="{Binding ImportFromJsonCommand}" Background="White" Padding="10,5" Margin="0,0,10,0"/>
                 <Button Content="Generuj Skrypt SQL" Command="{Binding GenerateSqlCommand}" Background="#FFEB3B" FontWeight="Bold" Padding="10,5"/>
+                <Button Content="Eksport do MySQL" Click="ExportToMySQL_Click" Background="#4CAF50" Foreground="White" FontWeight="Bold" Margin="10,0,0,0" Padding="10,5"/>
             </StackPanel>
         </Border>
 

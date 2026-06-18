@@ -1,0 +1,29 @@
+<Window x:Class="DbModeler.MySqlExportDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Połączenie MySQL" Width="350" Height="400"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+
+    <StackPanel Margin="15">
+        <TextBlock Text="Host:"/>
+        <TextBox x:Name="TxtHost" Text="localhost" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Port:"/>
+        <TextBox x:Name="TxtPort" Text="3306" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Użytkownik:"/>
+        <TextBox x:Name="TxtUser" Text="root" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Hasło:"/>
+        <PasswordBox x:Name="PwdPassword" Margin="0,0,0,10"/>
+
+        <TextBlock Text="Baza danych:"/>
+        <TextBox x:Name="TxtDatabase" Margin="0,0,0,10"/>
+
+        <CheckBox x:Name="ChkCreateDb" Content="Utwórz bazę jeśli nie istnieje" IsChecked="True" Margin="0,0,0,15"/>
+
+        <Button x:Name="BtnConnect" Content="Wykonaj SQL" Click="BtnConnect_Click" Height="30"/>
+
+        <TextBlock x:Name="TxtStatus" Margin="0,10,0,0" TextWrapping="Wrap" FontWeight="Bold"/>
+    </StackPanel>
+</Window>
